@@ -1,9 +1,9 @@
-#ifndef ALLOWEDCHARS_H_INCLUDED
-#define ALLOWEDCHARS_H_INCLUDED
+#ifndef ALPHABET_H_INCLUDED
+#define ALPHABET_H_INCLUDED
 
-const int SizeAllowedChars = 10 + 26 + 26 + 16;
+static const int SizeAlphabet = 10 + 26 + 26 + 16;
 
-const wchar_t allowedChars[SizeAllowedChars]=
+static const wchar_t alphabet[SizeAlphabet] =
 {
     '0',
     '1',
@@ -85,4 +85,4 @@ const wchar_t allowedChars[SizeAllowedChars]=
     '>'
 };
 
-#endif // ALLOWEDCHARS_H_INCLUDED
+#endif // ALPHABET_H_INCLUDED
