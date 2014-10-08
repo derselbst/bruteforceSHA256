@@ -35,7 +35,7 @@ void brute(string baseString, int width, int position)
     }
 }
 
-int main()
+int bruteInit()
 {
     cout << "Enter a string: " << endl;
     cin >> pwd;
