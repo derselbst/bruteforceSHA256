@@ -1,9 +1,9 @@
 #ifndef ALPHABET_H_INCLUDED
 #define ALPHABET_H_INCLUDED
 
-static const int SizeAlphabet = 10 + 26 + 26 + 16;
+static const int SizeAlphabet = 10 + 26 + 26 + 15;
 
-static const wchar_t alphabet[SizeAlphabet] =
+static const char alphabet[SizeAlphabet] =
 {
     '0',
     '1',
@@ -75,7 +75,6 @@ static const wchar_t alphabet[SizeAlphabet] =
     ':',
     '_',
     '!',
-    L'§', // TODO: brauchen wir wirklich nur wegen diesem Mist nen wchar Array
     '$',
     '%',
     '&',
