@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(bruteforceSHA256)
 
-set(CMAKE_C_FLAGS "-g -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "-g -Wall -Wextra")
 set(LD_FLAGS "-lcrypto")
 
 set(_SRC
