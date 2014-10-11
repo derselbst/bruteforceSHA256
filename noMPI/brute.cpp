@@ -3,6 +3,7 @@
 #include <cstdio> // printf()
 #include <cstring> // strcmp()
 #include <string>
+#include <stack>
 #include <openssl/sha.h>
 #include <byteswap.h>
 #include "alphabet.h"
@@ -14,7 +15,7 @@ string pwd;
 char pwdHash[SHA256_DIGEST_LENGTH];
 char bruteHash[SHA256_DIGEST_LENGTH];
 
-static const unsigned char MaxChars = 20;
+static const unsigned char MaxChars = 3;
 
 void printSHAHash(unsigned int* pbuf)
 {
@@ -55,9 +56,9 @@ bool generateSHA256(const void *const inputStr, const size_t &length, char *cons
 
 void checkPassword(const string &password)
 {
-    #ifdef VERBOSE
+//#ifdef VERBOSE
     cout << "checking " << password << endl;
-    #endif // VERBOSE
+//#endif // VERBOSE
 
     // generate sha hash from entered string and write it to pwdHash
     if(!generateSHA256(password.c_str(), password.length(), bruteHash))
@@ -74,17 +75,44 @@ void checkPassword(const string &password)
     }
 }
 
-void brute(const string baseString, const int width, const int position)
+void bruteRecursive(const string baseString, const unsigned int width)
 {
     for(int i=0; i<SizeAlphabet; i++)
     {
-        if (position+1 < width)
+        if (baseString.length()+1 < width)
         {
-            brute(baseString+alphabet[i], width, position+1);
+            bruteRecursive(baseString+alphabet[i], width);
         }
 
         checkPassword(baseString+alphabet[i]);
     }
+}
+
+void bruteIterative(const unsigned int width)
+{
+    stack<string> myStack;
+
+    // myStack must contain at least one element when entering loop
+    // else: SIGSEGV
+    // hence, start checking with an empty string
+    myStack.push("");
+
+    do
+    {
+        string baseString = myStack.top();
+        myStack.pop();
+        cout << "checking passwords with " << baseString.length()+1 << " characters..." << endl;
+        for(int i=0; i<SizeAlphabet; i++)
+        {
+            if (baseString.length()+1 < width)
+            {
+                myStack.push(baseString+alphabet[i]);
+            }
+
+            checkPassword(baseString+alphabet[i]);
+        }
+    }
+    while(!myStack.empty());
 }
 
 int main()
@@ -105,11 +133,15 @@ int main()
 
     }
 
+    cout << "checking using Recusive Method" << endl;
     for(int i=1; i<=MaxChars; i++)
     {
         cout << "checking passwords with " << i << " characters..." << endl;
-        brute(string(""),i,0);
+        bruteRecursive(string(""),i);
     }
+
+    cout << "checking using Iterative Method" << endl;
+    bruteIterative(MaxChars);
 
     return -1;
 }
