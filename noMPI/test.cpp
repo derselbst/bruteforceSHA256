@@ -35,7 +35,8 @@ int main()
     
     
     pwd="?";
-
+    strFound=false;
+    
     // generate sha hash from entered string and write it to pwdHash
     if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
     {
