@@ -19,7 +19,7 @@ char pwdHash[SHA256_DIGEST_LENGTH];
 char bruteHash[SHA256_DIGEST_LENGTH];
 
 // the maximum number of characters bruteforce shall check
-static const unsigned char MaxChars = 8;
+const unsigned char MaxChars = 8;
 
 /**
  * @brief prints 32 bytes of memory
@@ -211,10 +211,9 @@ bool bruteIterative(const unsigned int width)
 //    return false;
 }
 
-int main()
+int bruteInit(string password)
 {
-    cout << "Enter a string: " << endl;
-    cin >> pwd;
+    pwd=password;
 
     // generate sha hash from entered string and write it to pwdHash
     if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
