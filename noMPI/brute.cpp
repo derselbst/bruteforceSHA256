@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdio> // printf()
 #include <cstring> // memcmp()
 #include <string>
 #include <queue>
@@ -32,16 +31,16 @@ void printSHAHash(const unsigned int *const pbuf)
 {
     // byteswap the integer pointed to, to display hex dump in correct order
     // TODO: how to deal with big endian machines
-    printf("%X%X%X%X%X%X%X%X\n",
-           bswap_32(*(pbuf)),
-           bswap_32(*(pbuf+1)),
-           bswap_32(*(pbuf+2)),
-           bswap_32(*(pbuf+3)),
-           bswap_32(*(pbuf+4)),
-           bswap_32(*(pbuf+5)),
-           bswap_32(*(pbuf+6)),
-           bswap_32(*(pbuf+7))
-          );
+    cout << std::hex << std::uppercase
+        << bswap_32(*(pbuf))
+        << bswap_32(*(pbuf+1))
+        << bswap_32(*(pbuf+2))
+        << bswap_32(*(pbuf+3))
+        << bswap_32(*(pbuf+4))
+        << bswap_32(*(pbuf+5))
+        << bswap_32(*(pbuf+6))
+        << bswap_32(*(pbuf+7))
+        << endl;
 }
 
 /**
@@ -193,7 +192,7 @@ int bruteInit(string password)
     }
     else
     {
-        printf("SHA256 Hash for secret password is:\n");
+        cout << "SHA256 Hash for secret password is:" << endl;
         printSHAHash((unsigned int*)pwdHash);
 
     }
