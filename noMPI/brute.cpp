@@ -179,36 +179,6 @@ bool bruteIterative(const unsigned int width)
     }
     while(!myQueue.empty());
     return false;
-//
-//    queue<string> myQueue;
-//    string baseString = "";
-//    while(baseString.length() < width)
-//    {
-//        for(int i=0; i<SizeAlphabet; i++)
-//        {
-//            if (baseString.length()+1 < width)
-//            {
-//                myQueue.push(baseString+alphabet[i]);
-//            }
-//
-//            if(checkPassword(baseString+alphabet[i]))
-//            {
-//                return true;
-//            }
-//        }
-//
-//        if(!myQueue.empty())
-//        {
-//            baseString = myQueue.front();
-//            myQueue.pop();
-//        }
-//        else
-//        {
-//            return false;
-//        }
-//    }
-//
-//    return false;
 }
 
 int bruteInit(string password)
