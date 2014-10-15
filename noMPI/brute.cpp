@@ -19,7 +19,7 @@ char pwdHash[SHA256_DIGEST_LENGTH];
 char bruteHash[SHA256_DIGEST_LENGTH];
 
 // the maximum number of characters bruteforce shall check
-const unsigned char MaxChars = 8;
+const unsigned char MaxChars = 20;
 
 /**
  * @brief prints 32 bytes of memory
@@ -223,7 +223,7 @@ int bruteInit(string password)
     }
     else
     {
-        printf("SHA256 Hash for your string is:\n");
+        printf("SHA256 Hash for secret password is:\n");
         printSHAHash((unsigned int*)pwdHash);
 
     }
