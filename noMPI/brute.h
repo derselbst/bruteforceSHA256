@@ -5,7 +5,7 @@ extern char pwdHash[SHA256_DIGEST_LENGTH];
 extern char bruteHash[SHA256_DIGEST_LENGTH];
 
 // the maximum number of characters bruteforce shall check
-extern const unsigned char MaxChars = 20;
+const unsigned char MaxChars = 20;
 
 int bruteInit(string password);
 bool bruteIterative(const unsigned int width);

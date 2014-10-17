@@ -17,9 +17,6 @@ char pwdHash[SHA256_DIGEST_LENGTH];
 // contains the hash of a bruteforced string
 char bruteHash[SHA256_DIGEST_LENGTH];
 
-// the maximum number of characters bruteforce shall check
-const unsigned char MaxChars = 20;
-
 /**
  * @brief prints 32 bytes of memory
  *
