@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
+set(CMAKE_C_COMPILER "mpicc")
+set(CMAKE_CXX_COMPILER "mpic++")
+
 
 project(bruteforceSHA256)
-
+ 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -DVERBOSE")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
@@ -12,7 +15,7 @@ message("OpenSSL libraries: ${OPENSSL_LIBRARIES}")
 
 set(_SRC
 	brute.cpp
-	test.cpp
+	main.cpp
 )
 
 add_executable(bruteSHA ${_SRC})
