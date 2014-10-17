@@ -4,9 +4,11 @@
 #include <queue>
 #include <openssl/sha.h>
 #include <byteswap.h>
-#include "alphabet.h"
 
 using namespace std;
+
+#include "brute.h"
+#include "alphabet.h"
 
 // clear text password entered by user
 string pwd;

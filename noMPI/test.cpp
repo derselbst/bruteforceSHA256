@@ -11,7 +11,6 @@ extern volatile bool strFound;
 
 int main()
 {
-
     string pwd="<,6F";
 
     // generate sha hash from entered string and write it to pwdHash
@@ -32,11 +31,11 @@ int main()
     cout << "checking using Iterative Method" << endl;
     assert(bruteIterative(MaxChars));
 
-    
-    
+
+
     pwd="?";
     strFound=false;
-    
+
     // generate sha hash from entered string and write it to pwdHash
     if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
     {
