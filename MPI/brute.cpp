@@ -2,11 +2,15 @@
 #include <cstring> // memcmp()
 #include <string>
 #include <queue>
+#include <limits>
 #include <openssl/sha.h>
 #include <byteswap.h>
-#include "alphabet.h"
+#include <mpi.h>
 
 using namespace std;
+
+#include "alphabet.h"
+#include "brute.h"
 
 // clear text password entered by user
 string pwd;
@@ -17,8 +21,12 @@ char pwdHash[SHA256_DIGEST_LENGTH];
 // contains the hash of a bruteforced string
 char bruteHash[SHA256_DIGEST_LENGTH];
 
-// the maximum number of characters bruteforce shall check
-const unsigned char MaxChars = 20;
+enum MpiMsgTag
+{
+    task,
+    success, // hashes match
+    fail
+};
 
 /**
  * @brief prints 32 bytes of memory
@@ -32,15 +40,15 @@ void printSHAHash(const unsigned int *const pbuf)
     // byteswap the integer pointed to, to display hex dump in correct order
     // TODO: how to deal with big endian machines
     cout << std::hex << std::uppercase
-        << bswap_32(*(pbuf))
-        << bswap_32(*(pbuf+1))
-        << bswap_32(*(pbuf+2))
-        << bswap_32(*(pbuf+3))
-        << bswap_32(*(pbuf+4))
-        << bswap_32(*(pbuf+5))
-        << bswap_32(*(pbuf+6))
-        << bswap_32(*(pbuf+7))
-        << endl;
+         << bswap_32(*(pbuf))
+         << bswap_32(*(pbuf+1))
+         << bswap_32(*(pbuf+2))
+         << bswap_32(*(pbuf+3))
+         << bswap_32(*(pbuf+4))
+         << bswap_32(*(pbuf+5))
+         << bswap_32(*(pbuf+6))
+         << bswap_32(*(pbuf+7))
+         << endl;
 }
 
 /**
@@ -113,6 +121,42 @@ bool checkPassword(const string &password)
     return false;
 }
 
+void CallMPIProcess(string guessedPwd)
+{
+    int totalProcesses=MPI::COMM_WORLD.Get_size();
+
+    if(totalProcesses < 2)
+    {
+        cerr << "Insufficient number of workers: " << totalProcesses-1 << endl << "Aborting" << endl;
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+
+    static int currentProcess=0;
+    if(currentProcess == MasterProcess)
+    {
+        currentProcess++;
+    }
+
+    static vector<MPI_Request> request(totalProcesses);
+    static vector<MPI_Status> status(totalProcesses);
+
+    // wait in case currentProzess hasnt finished yet and this is not the first call
+    if(request[currentProcess] != NULL)
+    {
+        MPI_Wait(&request[currentProcess], &status[currentProcess]);
+    }
+
+    // ...evil const_cast...
+    MPI_Send(const_cast<char*>(guessedPwd.c_str()), guessedPwd.length(), MPI_BYTE, currentProcess, task, MPI_COMM_WORLD);//, &request[currentProcess]);
+
+    currentProcess++;
+    // actually: currentProcess >= totalProcesses
+    if(currentProcess == totalProcesses)
+    {
+        currentProcess=0;
+    }
+}
+
 /**
  * @brief recursive implementation of bruteforce
  *
@@ -170,42 +214,45 @@ bool bruteIterative(const unsigned int width)
                 myQueue.push(baseString+alphabet[i]);
             }
 
-            if(checkPassword(baseString+alphabet[i]))
-            {
-                return true;
-            }
+//            if(checkPassword(baseString+alphabet[i]))
+//            {
+//                return true;
+//            }
+            CallMPIProcess(baseString+alphabet[i]);
         }
     }
     while(!myQueue.empty());
     return false;
 }
 
-int bruteInit(string password)
+void worker()
 {
-    pwd=password;
+    char* buf;
+    MPI_Status state;
 
-    // generate sha hash from entered string and write it to pwdHash
-    if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
+    while(true)
     {
-        cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
-        return -2;
+        int len=numeric_limits<int>::max();
+
+        // check for new msg
+        MPI_Probe(MasterProcess, task, MPI_COMM_WORLD, &state);
+
+        // now check status to determine how many bytes were actually received
+        MPI_Get_count(&state, MPI_BYTE, &len);
+
+        // receive len bytes
+        MPI_Recv(&buf, len, MPI_BYTE, MasterProcess, task, MPI_COMM_WORLD, &state);
+
+        string str(buf, len);
+        if(checkPassword(str))
+        {
+            //success, tell master
+            //MPI_Send(const_cast<char*>(str.c_str()), str.length(), MPI_CHAR, MasterProcess, success, MPI_COMM_WORLD);
+            cout << "Password found: " << str << endl;
+            MPI_Abort(MPI_COMM_WORLD, 0);
+
+            break;
+        }
     }
-    else
-    {
-        cout << "SHA256 Hash for secret password is:" << endl;
-        printSHAHash((unsigned int*)pwdHash);
-
-    }
-
-    cout << "checking using Recusive Method" << endl;
-    for(int i=1; (i<=MaxChars) && (!strFound); i++)
-    {
-        cout << "checking passwords with " << i << " characters..." << endl;
-        bruteRecursive(string(""),i);
-    }
-
-    cout << "checking using Iterative Method" << endl;
-    bruteIterative(MaxChars);
-
-    return 0;
 }
+

@@ -2,57 +2,40 @@
 #include <string>
 #include <openssl/sha.h>
 #include <assert.h>
+#include <mpi.h>
 
 using namespace std;
 
 #include "brute.h"
 
-extern volatile bool strFound;
+extern const int MasterProcess;
 
-int main()
+int main(int argc, char** argv)
 {
-    string pwd="<,6F";
+    MPI_Init(&argc, &argv);
 
-    // generate sha hash from entered string and write it to pwdHash
+    string pwd="000";
+
+    // initialize the hash buffer for the password
     if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
     {
         cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
         return -2;
     }
 
-    cout << "checking using Recusive Method" << endl;
-    for(int i=1; (i<=MaxChars) && (!strFound); i++)
+    int worldRank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
+
+
+    if(worldRank == MasterProcess)
     {
-        cout << "checking passwords with " << i << " characters..." << endl;
-        bruteRecursive(string(""),i);
+        bruteIterative(MaxChars);
     }
-    assert(strFound);
-
-    cout << "checking using Iterative Method" << endl;
-    assert(bruteIterative(MaxChars));
-
-
-
-    pwd="?";
-    strFound=false;
-
-    // generate sha hash from entered string and write it to pwdHash
-    if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
+    else
     {
-        cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
-        return -2;
+        worker();
     }
 
-    cout << "checking using Recusive Method" << endl;
-    for(int i=1; (i<=MaxChars) && (!strFound); i++)
-    {
-        cout << "checking passwords with " << i << " characters..." << endl;
-        bruteRecursive(string(""),i);
-    }
-    assert(!strFound);
-
-    cout << "checking using Iterative Method" << endl;
-    assert(!bruteIterative(MaxChars));
-
+    MPI_Finalize();
     return 0;
 }
