@@ -28,6 +28,8 @@ enum MpiMsgTag
     fail
 };
 
+int totalProcesses = 0;
+
 /**
  * @brief prints 32 bytes of memory
  *
@@ -121,30 +123,26 @@ bool checkPassword(const string &password)
     return false;
 }
 
+//TODO: has to be deleted somewhere
+bool * firstTime;
+
 void CallMPIProcess(string guessedPwd)
 {
-    int totalProcesses=MPI::COMM_WORLD.Get_size();
-
-    if(totalProcesses < 2)
-    {
-        cerr << "Insufficient number of workers: " << totalProcesses-1 << endl << "Aborting" << endl;
-        MPI_Abort(MPI_COMM_WORLD, -1);
-    }
-
     static int currentProcess=0;
     if(currentProcess == MasterProcess)
     {
         currentProcess++;
     }
 
-    static vector<MPI_Request> request(totalProcesses);
-    static vector<MPI_Status> status(totalProcesses);
-
     // wait in case currentProzess hasnt finished yet and this is not the first call
-    if(request[currentProcess] != NULL)
-    {
-        MPI_Wait(&request[currentProcess], &status[currentProcess]);
-    }
+//    if(!firstTime[currentProcess])
+//    {
+//        MPI_Wait(&request[currentProcess], &status[currentProcess]);
+//    }
+//    else
+//    {
+//        firstTime[currentProcess]=false;
+//    }
 
     // ...evil const_cast...
     MPI_Send(const_cast<char*>(guessedPwd.c_str()), guessedPwd.length(), MPI_BYTE, currentProcess, task, MPI_COMM_WORLD);//, &request[currentProcess]);
@@ -227,7 +225,7 @@ bool bruteIterative(const unsigned int width)
 
 void worker()
 {
-    char* buf;
+    char* buf=NULL;
     MPI_Status state;
 
     while(true)
@@ -240,10 +238,15 @@ void worker()
         // now check status to determine how many bytes were actually received
         MPI_Get_count(&state, MPI_BYTE, &len);
 
+        // allocate len bytes
+        buf=new char[len];
+
         // receive len bytes
-        MPI_Recv(&buf, len, MPI_BYTE, MasterProcess, task, MPI_COMM_WORLD, &state);
+        MPI_Recv(buf, len, MPI_BYTE, MasterProcess, task, MPI_COMM_WORLD, &state);
 
         string str(buf, len);
+        delete [] buf;
+
         if(checkPassword(str))
         {
             //success, tell master
