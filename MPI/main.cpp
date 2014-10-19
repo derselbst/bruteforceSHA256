@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <openssl/sha.h>
-#include <assert.h>
 #include <mpi.h>
 
 using namespace std;
@@ -14,7 +13,7 @@ int main(int argc, char** argv)
 {
     MPI_Init(&argc, &argv);
 
-    string pwd="secret";
+    string pwd="0<GV";
 
     // initialize the hash buffer for the password
     if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
