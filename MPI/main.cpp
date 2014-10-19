@@ -8,8 +8,6 @@ using namespace std;
 #include "worker.h"
 #include "master.h"
 
-extern const int MasterProcess;
-
 int main(int argc, char** argv)
 {
     MPI_Init(&argc, &argv);
