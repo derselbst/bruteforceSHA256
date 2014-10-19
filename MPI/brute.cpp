@@ -123,9 +123,6 @@ bool checkPassword(const string &password)
     return false;
 }
 
-//TODO: has to be deleted somewhere
-bool * firstTime;
-
 void CallMPIProcess(string guessedPwd)
 {
     static int currentProcess=0;
@@ -134,50 +131,13 @@ void CallMPIProcess(string guessedPwd)
         currentProcess++;
     }
 
-    // wait in case currentProzess hasnt finished yet and this is not the first call
-//    if(!firstTime[currentProcess])
-//    {
-//        MPI_Wait(&request[currentProcess], &status[currentProcess]);
-//    }
-//    else
-//    {
-//        firstTime[currentProcess]=false;
-//    }
-
     // ...evil const_cast...
     MPI_Send(const_cast<char*>(guessedPwd.c_str()), guessedPwd.length(), MPI_BYTE, currentProcess, task, MPI_COMM_WORLD);//, &request[currentProcess]);
 
     currentProcess++;
-    // actually: currentProcess >= totalProcesses
-    if(currentProcess == totalProcesses)
+    if(currentProcess >= totalProcesses)
     {
         currentProcess=0;
-    }
-}
-
-/**
- * @brief recursive implementation of bruteforce
- *
- * recursive implementation of bruteforce attack
- * call it as follows: bruteRecursive(string(""), width);
- *
- * @param[in]   baseString: a const string indicates the prefix of a string to be checked
- * @param[in]   width:      the maximum number of characters you wish to be checked
- */
-volatile bool strFound = false;
-void bruteRecursive(const string baseString, const unsigned int width)
-{
-    for(int i=0; (i<SizeAlphabet) && (!strFound); i++)
-    {
-        if (baseString.length()+1 < width)
-        {
-            bruteRecursive(baseString+alphabet[i], width);
-        }
-
-        if(checkPassword(baseString+alphabet[i]))
-        {
-            strFound = true;
-        }
     }
 }
 
@@ -212,10 +172,6 @@ bool bruteIterative(const unsigned int width)
                 myQueue.push(baseString+alphabet[i]);
             }
 
-//            if(checkPassword(baseString+alphabet[i]))
-//            {
-//                return true;
-//            }
             CallMPIProcess(baseString+alphabet[i]);
         }
     }
