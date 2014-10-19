@@ -1,3 +1,8 @@
+/**
+ * Author: derselbst
+ * Description: provides functions that are used by the master process, which performs the bruteforce attack
+ */
+
 #include <iostream>
 #include <cstring> // memcmp()
 #include <string>
@@ -12,15 +17,23 @@ using namespace std;
 #include "alphabet.h"
 #include "master.h"
 
+// used when sending messages
 enum MpiMsgTag
 {
     task,
-    success // hashes match
+    success // hashes match, unused ATM
 };
 
 int totalProcesses = 0;
 
-void CallMPIProcess(string guessedPwd)
+/**
+ * @brief occupy a worker
+ * 
+ * calls a worker and gives him something to do
+ * 
+ * @param[in] the string, that will be checked by a worker
+ */
+void CallMPIProcess(const string guessedPwd)
 {
     static int currentProcess=0;
     if(currentProcess == MasterProcess)
@@ -41,14 +54,14 @@ void CallMPIProcess(string guessedPwd)
 /**
  * @brief iterative implementation of bruteforce
  *
- * iterative implementation of bruteforce attack
+ * generates all permutations of a string with 1, 2, 3, ..., width characters
+ * and tells a worker the check it
+ * 
  * call it as follows: bruteIterative(width);
  *
  * @param[in]   width:      the maximum number of characters you wish to be checked
- *
- * @return return true if the password was found
  */
-bool bruteIterative(const unsigned int width)
+void bruteIterative(const unsigned int width)
 {
     queue<string> myQueue;
 
@@ -73,5 +86,4 @@ bool bruteIterative(const unsigned int width)
         }
     }
     while(!myQueue.empty());
-    return false;
 }

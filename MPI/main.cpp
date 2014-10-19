@@ -1,3 +1,8 @@
+/**
+ * Author: derselbst
+ * Description: a demo program
+ */
+
 #include <iostream>
 #include <string>
 #include <openssl/sha.h>
