@@ -38,6 +38,10 @@ int main(int argc, char** argv)
         }
 
         bruteIterative(MaxChars);
+
+        cerr << "Sorry, password not found" << endl;
+        // TODO: shutdown a bit more friendly
+        MPI_Abort(MPI_COMM_WORLD, -2);
     }
     else
     {
