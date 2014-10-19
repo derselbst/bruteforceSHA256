@@ -20,22 +20,22 @@ int main(int argc, char** argv)
         cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
         return -2;
     }
-
+    
+    // determine the size of the world and create for every single process a status and request element
+    totalProcesses=MPI::COMM_WORLD.Get_size();
+    if(totalProcesses < 2)
+    {
+        cerr << "Insufficient number of workers: " << totalProcesses-1 << endl << "Aborting" << endl;
+        MPI_Abort(MPI_COMM_WORLD, -1);
+    }
+    
+    // determine which process i am
     int worldRank;
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
 
 
     if(worldRank == MasterProcess)
     {
-        // determine the size of the world and create for every single process a status and request element
-        totalProcesses=MPI::COMM_WORLD.Get_size();
-
-        if(totalProcesses < 2)
-        {
-            cerr << "Insufficient number of workers: " << totalProcesses-1 << endl << "Aborting" << endl;
-            MPI_Abort(MPI_COMM_WORLD, -1);
-        }
-
         bruteIterative(MaxChars);
 
         cerr << "Sorry, password not found" << endl;
