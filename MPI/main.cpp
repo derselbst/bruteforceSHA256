@@ -5,7 +5,8 @@
 
 using namespace std;
 
-#include "brute.h"
+#include "worker.h"
+#include "master.h"
 
 extern const int MasterProcess;
 

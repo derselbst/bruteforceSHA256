@@ -14,7 +14,8 @@ message("OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
 message("OpenSSL libraries: ${OPENSSL_LIBRARIES}")
 
 set(_SRC
-	brute.cpp
+	master.cpp
+	worker.cpp
 	main.cpp
 )
 

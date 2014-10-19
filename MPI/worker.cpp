@@ -9,11 +9,8 @@
 
 using namespace std;
 
-#include "alphabet.h"
-#include "brute.h"
-
-// clear text password entered by user
-string pwd;
+#include "worker.h"
+#include "master.h"
 
 // contains the hash of the unknown password
 char pwdHash[SHA256_DIGEST_LENGTH];
@@ -27,8 +24,6 @@ enum MpiMsgTag
     success, // hashes match
     fail
 };
-
-int totalProcesses = 0;
 
 /**
  * @brief prints 32 bytes of memory
@@ -123,62 +118,6 @@ bool checkPassword(const string &password)
     return false;
 }
 
-void CallMPIProcess(string guessedPwd)
-{
-    static int currentProcess=0;
-    if(currentProcess == MasterProcess)
-    {
-        currentProcess++;
-    }
-
-    // ...evil const_cast...
-    MPI_Send(const_cast<char*>(guessedPwd.c_str()), guessedPwd.length(), MPI_BYTE, currentProcess, task, MPI_COMM_WORLD);//, &request[currentProcess]);
-
-    currentProcess++;
-    if(currentProcess >= totalProcesses)
-    {
-        currentProcess=0;
-    }
-}
-
-/**
- * @brief iterative implementation of bruteforce
- *
- * iterative implementation of bruteforce attack
- * call it as follows: bruteIterative(width);
- *
- * @param[in]   width:      the maximum number of characters you wish to be checked
- *
- * @return return true if the password was found
- */
-bool bruteIterative(const unsigned int width)
-{
-    queue<string> myQueue;
-
-    // myQueue must contain at least one element when entering loop
-    // else: SIGSEGV
-    // hence, start checking with an empty string
-    myQueue.push("");
-
-    do
-    {
-        string baseString = myQueue.front();
-        myQueue.pop();
-
-        for(int i=0; i<SizeAlphabet; i++)
-        {
-            if (baseString.length()+1 < width)
-            {
-                myQueue.push(baseString+alphabet[i]);
-            }
-
-            CallMPIProcess(baseString+alphabet[i]);
-        }
-    }
-    while(!myQueue.empty());
-    return false;
-}
-
 void worker()
 {
     char* buf=NULL;
@@ -196,12 +135,14 @@ void worker()
 
         // allocate len bytes
         buf=new char[len];
+	// TODO: check whether allocation succeeded
 
         // receive len bytes
         MPI_Recv(buf, len, MPI_BYTE, MasterProcess, task, MPI_COMM_WORLD, &state);
 
         string str(buf, len);
         delete [] buf;
+	buf=NULL;
 
         if(checkPassword(str))
         {
