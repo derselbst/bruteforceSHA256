@@ -6,5 +6,5 @@ const int MasterProcess = 0;
 
 extern int totalProcesses;
 
-bool bruteIterative(const unsigned int width);
+void bruteIterative(const unsigned int width);
 void CallMPIProcess(string guessedPwd);
