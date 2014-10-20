@@ -136,24 +136,23 @@ void worker()
 
     while(true)
     {
-        int len=numeric_limits<int>::max();
-
         // check for new msg
         MPI_Probe(MasterProcess, task, MPI_COMM_WORLD, &state);
 
+        int len;
         // now check status to determine how many bytes were actually received
         MPI_Get_count(&state, MPI_BYTE, &len);
 
         // allocate len bytes
         buf=new char[len];
-	// TODO: check whether allocation succeeded
+        // TODO: check whether allocation succeeded
 
         // receive len bytes
         MPI_Recv(buf, len, MPI_BYTE, MasterProcess, task, MPI_COMM_WORLD, &state);
 
         string str(buf, len);
         delete [] buf;
-	buf=NULL;
+        buf=NULL;
 
         if(checkPassword(str))
         {
