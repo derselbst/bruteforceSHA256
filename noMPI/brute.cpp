@@ -2,6 +2,7 @@
 #include <cstring> // memcmp()
 #include <string>
 #include <queue>
+#include <iomanip>
 #include <openssl/sha.h>
 #include <byteswap.h>
 
@@ -30,7 +31,7 @@ void printSHAHash(const unsigned int *const pbuf)
 {
     // byteswap the integer pointed to, to display hex dump in correct order
     // TODO: how to deal with big endian machines
-    cout << std::hex << std::uppercase
+    cout << std::hex << std::uppercase << setw(8) << setfill('0')
         << bswap_32(*(pbuf))
         << bswap_32(*(pbuf+1))
         << bswap_32(*(pbuf+2))
