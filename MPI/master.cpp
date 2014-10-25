@@ -28,21 +28,23 @@ int totalProcesses = 0;
 
 /**
  * @brief occupy a worker
- * 
+ *
  * calls a worker and gives him something to do
- * 
- * @param[in] the string, that will be checked by a worker
+ *
+ * @param[in] the baseString, that will be checked by a worker
  */
-void CallMPIProcess(const string guessedPwd)
+void CallMPIProcess(const string baseStringPwd)
 {
     static int currentProcess=0;
     if(currentProcess == MasterProcess)
     {
         currentProcess++;
     }
-
+#ifdef VERBOSE
+    cout << "calling process " << currentProcess << " of " << totalProcesses-1 << endl;
+#endif // VERBOSE
     // ...evil const_cast...
-    MPI_Send(const_cast<char*>(guessedPwd.c_str()), guessedPwd.length(), MPI_BYTE, currentProcess, task, MPI_COMM_WORLD);//, &request[currentProcess]);
+    MPI_Send(const_cast<char*>(baseStringPwd.c_str()), baseStringPwd.length(), MPI_BYTE, currentProcess, task, MPI_COMM_WORLD);//, &request[currentProcess]);
 
     currentProcess++;
     if(currentProcess >= totalProcesses)
@@ -54,9 +56,9 @@ void CallMPIProcess(const string guessedPwd)
 /**
  * @brief iterative implementation of bruteforce
  *
- * generates all permutations of a string with 1, 2, 3, ..., width characters
+ * generates all baseString with 1,2,3,...,width-1 characters
  * and tells a worker the check it
- * 
+ *
  * call it as follows: bruteIterative(width);
  *
  * @param[in]   width:      the maximum number of characters you wish to be checked
@@ -74,6 +76,7 @@ void bruteIterative(const unsigned int width)
     {
         string baseString = myQueue.front();
         myQueue.pop();
+        CallMPIProcess(baseString);
 
         for(int i=0; i<SizeAlphabet; i++)
         {
@@ -81,8 +84,6 @@ void bruteIterative(const unsigned int width)
             {
                 myQueue.push(baseString+alphabet[i]);
             }
-
-            CallMPIProcess(baseString+alphabet[i]);
         }
     }
     while(!myQueue.empty());

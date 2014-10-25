@@ -17,6 +17,7 @@ using namespace std;
 
 #include "worker.h"
 #include "master.h"
+#include "alphabet.h"
 
 // contains the hash of the unknown password
 char pwdHash[SHA256_DIGEST_LENGTH];
@@ -43,15 +44,15 @@ void printSHAHash(const unsigned int *const pbuf)
     // byteswap the integer pointed to, to display hex dump in correct order
     // TODO: how to deal with big endian machines
     cout << std::hex << std::uppercase << setw(8) << setfill('0')
-        << bswap_32(*(pbuf))
-        << bswap_32(*(pbuf+1))
-        << bswap_32(*(pbuf+2))
-        << bswap_32(*(pbuf+3))
-        << bswap_32(*(pbuf+4))
-        << bswap_32(*(pbuf+5))
-        << bswap_32(*(pbuf+6))
-        << bswap_32(*(pbuf+7))
-        << endl;
+         << bswap_32(*(pbuf))
+         << bswap_32(*(pbuf+1))
+         << bswap_32(*(pbuf+2))
+         << bswap_32(*(pbuf+3))
+         << bswap_32(*(pbuf+4))
+         << bswap_32(*(pbuf+5))
+         << bswap_32(*(pbuf+6))
+         << bswap_32(*(pbuf+7))
+         << endl;
 }
 
 /**
@@ -126,7 +127,7 @@ bool checkPassword(const string &password)
 
 /**
  * @brief the main loop for a worker process
- * 
+ *
  * continuously looks for incoming strings, generates the SHA
  * hash of it and checks if it matches the secret hash
  */
@@ -155,15 +156,17 @@ void worker()
         delete [] buf;
         buf=NULL;
 
-        if(checkPassword(str))
+        for(int i=0; i<SizeAlphabet; i++)
         {
-            //success, tell master
-            //MPI_Send(const_cast<char*>(str.c_str()), str.length(), MPI_CHAR, MasterProcess, success, MPI_COMM_WORLD);
-            cout << "Password found: " << str << endl;
-            MPI_Abort(MPI_COMM_WORLD, 0);
+            if(checkPassword(str+alphabet[i]))
+            {
+                //success, tell master
+                //MPI_Send(const_cast<char*>(str+alphabet[i].c_str()), str+alphabet[i].length(), MPI_CHAR, MasterProcess, success, MPI_COMM_WORLD);
+                cout << "Password found: " << str+alphabet[i] << endl;
+                MPI_Abort(MPI_COMM_WORLD, 0);
 
-            break;
+                break;
+            }
         }
     }
 }
-
