@@ -152,17 +152,17 @@ void worker()
         // receive len bytes
         MPI_Recv(buf, len, MPI_BYTE, MasterProcess, task, MPI_COMM_WORLD, &state);
 
-        string str(buf, len);
+        string baseStr(buf, len);
         delete [] buf;
         buf=NULL;
 
         for(int i=0; i<SizeAlphabet; i++)
         {
-            if(checkPassword(str+alphabet[i]))
+            if(checkPassword(baseStr+alphabet[i]))
             {
                 //success, tell master
-                //MPI_Send(const_cast<char*>(str+alphabet[i].c_str()), str+alphabet[i].length(), MPI_CHAR, MasterProcess, success, MPI_COMM_WORLD);
-                cout << "Password found: " << str+alphabet[i] << endl;
+                //MPI_Send(const_cast<char*>(baseStr+alphabet[i].c_str()), baseStr+alphabet[i].length(), MPI_CHAR, MasterProcess, success, MPI_COMM_WORLD);
+                cout << "Password found: " << baseStr+alphabet[i] << endl;
                 MPI_Abort(MPI_COMM_WORLD, 0);
 
                 break;

@@ -40,9 +40,11 @@ void CallMPIProcess(const string baseStringPwd)
     {
         currentProcess++;
     }
+
 #ifdef VERBOSE
     cout << "calling process " << currentProcess << " of " << totalProcesses-1 << endl;
 #endif // VERBOSE
+
     // ...evil const_cast...
     MPI_Send(const_cast<char*>(baseStringPwd.c_str()), baseStringPwd.length(), MPI_BYTE, currentProcess, task, MPI_COMM_WORLD);//, &request[currentProcess]);
 

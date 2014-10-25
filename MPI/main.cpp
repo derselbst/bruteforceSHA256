@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 {
     MPI_Init(&argc, &argv);
 
-    string pwd="0<GV";
+    string pwd="00<GV";
 
     // initialize the hash buffer for the password
     if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
@@ -25,7 +25,7 @@ int main(int argc, char** argv)
         cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
         return -2;
     }
-    
+
     // determine the size of the world and create for every single process a status and request element
     totalProcesses=MPI::COMM_WORLD.Get_size();
     if(totalProcesses < 2)
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
         cerr << "Insufficient number of workers: " << totalProcesses-1 << endl << "Aborting" << endl;
         MPI_Abort(MPI_COMM_WORLD, -1);
     }
-    
+
     // determine which process i am
     int worldRank;
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
