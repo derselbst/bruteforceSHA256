@@ -25,13 +25,6 @@ char pwdHash[SHA256_DIGEST_LENGTH];
 // contains the hash of a bruteforced string
 char bruteHash[SHA256_DIGEST_LENGTH];
 
-// used when sending messages
-enum MpiMsgTag
-{
-    task,
-    success // hashes match, unused ATM
-};
-
 /**
  * @brief prints 32 bytes of memory
  *
