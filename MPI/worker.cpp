@@ -139,14 +139,14 @@ void worker()
     while(true)
     {
         // check for new msg
-        MPI_Probe(MasterProcess, task, MPI_COMM_WORLD, &state);
+        MPI_Probe(MasterProcess, MPI_ANY_TAG, MPI_COMM_WORLD, &state);
 
         int len;
         // now check status to determine how many bytes were actually received
         MPI_Get_count(&state, MPI_BYTE, &len);
 
         // receive len bytes
-        MPI_Recv(buf, len, MPI_BYTE, MasterProcess, task, MPI_COMM_WORLD, &state);
+        MPI_Recv(buf, len, MPI_BYTE, MasterProcess, MPI_ANY_TAG, MPI_COMM_WORLD, &state);
 
         string baseStr(buf, len);
 
