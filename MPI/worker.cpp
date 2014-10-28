@@ -133,7 +133,7 @@ bool checkPassword(const string &password)
  */
 void worker()
 {
-    char* buf=NULL;
+    char buf[MaxChars];
     MPI_Status state;
 
     while(true)
@@ -145,16 +145,10 @@ void worker()
         // now check status to determine how many bytes were actually received
         MPI_Get_count(&state, MPI_BYTE, &len);
 
-        // allocate len bytes
-        buf=new char[len];
-        // TODO: check whether allocation succeeded
-
         // receive len bytes
         MPI_Recv(buf, len, MPI_BYTE, MasterProcess, task, MPI_COMM_WORLD, &state);
 
         string baseStr(buf, len);
-        delete [] buf;
-        buf=NULL;
 
         for(int i=0; i<SizeAlphabet; i++)
         {
