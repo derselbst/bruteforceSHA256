@@ -142,12 +142,16 @@ void bruteRecursive(const string baseString, const unsigned int width)
 /**
  * @brief iterative implementation of bruteforce
  *
- * iterative implementation of bruteforce attack
+ * generates all baseString with 1,2,3,...,width-1 characters
  * call it as follows: bruteIterative(width);
  *
  * @param[in]   width:      the maximum number of characters you wish to be checked
  *
  * @return return true if the password was found
+ * 
+ * @warning PROGRAM MAY RUN OUT OF MEMORY
+ * this is a rather bad implementation, since saving all variations of a strings
+ * needs huge amounts of memory to hold them
  */
 bool bruteIterative(const unsigned int width)
 {
