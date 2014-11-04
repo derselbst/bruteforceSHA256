@@ -63,7 +63,8 @@ void CallMPIProcess(const string baseStringPwd)
  * call it as follows: bruteRecursive(string(""), width);
  *
  * @param[in]   baseString: a const string indicates the prefix of a string to be checked
- * @param[in]   width:      the maximum number of characters you wish to be checked
+ * @param[in]   minWidth:   all baseStrings shorter than minWidth will not be checked
+ * @param[in]   maxWidth:   the maximum length of baseString you wish to be checked
  */
 void bruteRecursive(const string baseString, const unsigned short &minWidth, const unsigned short &maxWidth)
 {
