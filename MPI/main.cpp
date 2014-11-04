@@ -31,7 +31,8 @@ int main(int argc, char** argv)
     if(totalProcesses < 2)
     {
         cerr << "Insufficient number of workers: " << totalProcesses-1 << endl << "Aborting" << endl;
-        MPI_Abort(MPI_COMM_WORLD, -1);
+        MPI_Finalize();
+        return -1;
     }
 
     // determine which process i am
@@ -59,3 +60,4 @@ int main(int argc, char** argv)
     MPI_Finalize();
     return 0;
 }
+
