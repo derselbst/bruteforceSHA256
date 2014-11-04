@@ -13,6 +13,34 @@ using namespace std;
 #include "worker.h"
 #include "master.h"
 
+void getPassword()
+{
+    cout << "Enter a Password or an SHA256 Hash: ";
+
+    string pwd;
+    cin >> pwd;
+
+    while((pwd.length() > MaxChars) && (pwd.length() != SHA256_DIGEST_LENGTH))
+    {
+        cerr << "Error: The Password you entered must be shorter " << (int)MaxChars << " Characters." << endl << "Try Again: ";
+        cin >> pwd;
+    }
+
+    if(pwd.length() == SHA256_DIGEST_LENGTH)
+    {
+        memcpy(pwdHash, pwd.c_str(), SHA256_DIGEST_LENGTH);
+    }
+    else
+    {
+        // initialize the hash buffer for the password
+        if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
+        {
+            cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
+            //TODO: how to handle? return -2;
+        }
+    }
+}
+
 int main(int argc, char** argv)
 {
     MPI_Init(&argc, &argv);
@@ -39,9 +67,10 @@ int main(int argc, char** argv)
     int worldRank;
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
 
-
     if(worldRank == MasterProcess)
     {
+        getPassword();
+
         for(int i=1; i<=MaxChars; i++)
         {
             cout << "checking passwords with " << i << " characters..." << endl;
@@ -60,4 +89,3 @@ int main(int argc, char** argv)
     MPI_Finalize();
     return 0;
 }
-
