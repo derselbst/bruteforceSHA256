@@ -43,6 +43,7 @@ int main(int argc, char** argv)
     {
         for(int i=1; i<=MaxChars; i++)
         {
+            cout << "checking passwords with " << i << " characters..." << endl;
             bruteRecursive(string(""), i-1, i);
         }
 
