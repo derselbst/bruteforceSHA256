@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 {
     MPI_Init(&argc, &argv);
 
-    string pwd="00<GV";
+    string pwd=">$<GV";
 
     // initialize the hash buffer for the password
     if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
@@ -41,7 +41,10 @@ int main(int argc, char** argv)
 
     if(worldRank == MasterProcess)
     {
-        bruteIterative(MaxChars);
+        for(int i=1; i<=MaxChars; i++)
+        {
+            bruteRecursive(string(""), i-1, i);
+        }
 
         cerr << "Sorry, password not found" << endl;
         // TODO: shutdown a bit more friendly

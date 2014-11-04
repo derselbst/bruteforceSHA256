@@ -56,37 +56,27 @@ void CallMPIProcess(const string baseStringPwd)
 }
 
 /**
- * @brief iterative implementation of bruteforce
+ * @brief recursive implementation of bruteforce
  *
  * generates all baseString with 1,2,3,...,width-1 characters
  * and tells a worker the check it
+ * call it as follows: bruteRecursive(string(""), width);
  *
- * call it as follows: bruteIterative(width);
- *
+ * @param[in]   baseString: a const string indicates the prefix of a string to be checked
  * @param[in]   width:      the maximum number of characters you wish to be checked
  */
-void bruteIterative(const unsigned int width)
+void bruteRecursive(const string baseString, const unsigned short &minWidth, const unsigned short &maxWidth)
 {
-    queue<string> myQueue;
-
-    // myQueue must contain at least one element when entering loop
-    // else: SIGSEGV
-    // hence, start checking with an empty string
-    myQueue.push("");
-
-    do
+    if(baseString.length()+1 > minWidth)
     {
-        string baseString = myQueue.front();
-        myQueue.pop();
         CallMPIProcess(baseString);
+    }
 
-        for(int i=0; i<SizeAlphabet; i++)
+    for(int i=0; i<SizeAlphabet; i++)
+    {
+        if (baseString.length()+1 < maxWidth)
         {
-            if (baseString.length()+1 < width)
-            {
-                myQueue.push(baseString+alphabet[i]);
-            }
+            bruteRecursive(baseString+alphabet[i], minWidth, maxWidth);
         }
     }
-    while(!myQueue.empty());
 }
