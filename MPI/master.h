@@ -7,4 +7,3 @@ const int MasterProcess = 0;
 extern int totalProcesses;
 
 void bruteRecursive(const string baseString, const unsigned short &minWidth, const unsigned short &maxWidth);
-void CallMPIProcess(string guessedPwd);
