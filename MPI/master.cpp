@@ -16,13 +16,7 @@ using namespace std;
 
 #include "alphabet.h"
 #include "master.h"
-
-// used when sending messages
-enum MpiMsgTag
-{
-    task,
-    success // hashes match, unused ATM
-};
+#include "mpiMsgTag.h"
 
 int totalProcesses = 0;
 

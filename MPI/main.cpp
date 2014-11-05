@@ -12,6 +12,7 @@ using namespace std;
 
 #include "worker.h"
 #include "master.h"
+#include "mpiMsgTag.h"
 
 void getPassword()
 {
@@ -73,7 +74,7 @@ int main(int argc, char** argv)
 
         for(int i=1; i<totalProcesses; i++)
         {
-        MPI_Send(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, i, 0, MPI_COMM_WORLD);
+        MPI_Send(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, i, hash, MPI_COMM_WORLD);
         }
 
         for(int i=1; i<=MaxChars; i++)
