@@ -71,6 +71,11 @@ int main(int argc, char** argv)
     {
         getPassword();
 
+        for(int i=1; i<totalProcesses; i++)
+        {
+        MPI_Send(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, i, 0, MPI_COMM_WORLD);
+        }
+
         for(int i=1; i<=MaxChars; i++)
         {
             cout << "checking passwords with " << i << " characters..." << endl;
@@ -83,6 +88,12 @@ int main(int argc, char** argv)
     }
     else
     {
+        MPI_Status state;
+
+        // check for new msg
+        MPI_Probe(MasterProcess, MPI_ANY_TAG, MPI_COMM_WORLD, &state);
+
+        MPI_Recv(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, MasterProcess, MPI_ANY_TAG, MPI_COMM_WORLD, &state);
         worker();
     }
 
