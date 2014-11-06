@@ -75,7 +75,7 @@ bool generateSHA256(const void *const input, const size_t &length, char *const h
         return false;
     }
 
-    if(!SHA256_Final(reinterpret_cast<unsigned char*>(hashStr), &hash))
+    if(!SHA256_Final(reinterpret_cast<unsigned char *const>(hashStr), &hash))
     {
         return false;
     }
