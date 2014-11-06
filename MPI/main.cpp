@@ -4,6 +4,7 @@
  */
 
 #include <iostream>
+#include <cstring> // std::memcpy()
 #include <string>
 #include <openssl/sha.h>
 #include <mpi.h>
@@ -37,7 +38,7 @@ void getPassword()
         if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
         {
             cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
-            //TODO: how to handle? return -2;
+            MPI_Abort(MPI_COMM_WORLD, -3);
         }
     }
 }
@@ -46,16 +47,7 @@ int main(int argc, char** argv)
 {
     MPI_Init(&argc, &argv);
 
-    string pwd=">$<GV";
-
-    // initialize the hash buffer for the password
-    if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
-    {
-        cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
-        return -2;
-    }
-
-    // determine the size of the world and create for every single process a status and request element
+    // determine the size of the world
     totalProcesses=MPI::COMM_WORLD.Get_size();
     if(totalProcesses < 2)
     {

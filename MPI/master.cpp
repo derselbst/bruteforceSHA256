@@ -4,12 +4,7 @@
  */
 
 #include <iostream>
-#include <cstring> // memcmp()
 #include <string>
-#include <queue>
-#include <limits>
-#include <openssl/sha.h>
-#include <byteswap.h>
 #include <mpi.h>
 
 using namespace std;
@@ -18,6 +13,7 @@ using namespace std;
 #include "master.h"
 #include "mpiMsgTag.h"
 
+// stores the total number of processes available
 int totalProcesses = 0;
 
 /**
@@ -25,7 +21,7 @@ int totalProcesses = 0;
  *
  * calls a worker and gives him something to do
  *
- * @param[in] the baseString, that will be checked by a worker
+ * @param[in]   baseStringPwd:  the baseString, that will be checked by a worker
  */
 void CallMPIProcess(const string baseStringPwd)
 {
