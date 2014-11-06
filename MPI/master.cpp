@@ -23,7 +23,7 @@ int totalProcesses = 0;
  *
  * @param[in]   baseStringPwd:  the baseString, that will be checked by a worker
  */
-void CallMPIProcess(const string baseStringPwd)
+void CallMPIProcess(const string &baseStringPwd)
 {
     static int currentProcess=0;
     if(currentProcess == MasterProcess)
