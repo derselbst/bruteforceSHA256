@@ -15,6 +15,12 @@ using namespace std;
 #include "master.h"
 #include "mpiMsgTag.h"
 
+/**
+ * @brief read password or SHA hash from stdin
+ *
+ * if the input is SHA256_DIGEST_LENGTH bytes long, then treat it as SHA hash
+ * else: cleartext password
+ */
 void getPassword()
 {
     cout << "Enter a Password or an SHA256 Hash: ";
@@ -62,13 +68,20 @@ int main(int argc, char** argv)
 
     if(worldRank == MasterProcess)
     {
+        /********************************************
+         * This is where the MasterProcess operates *
+         ********************************************/
+
+        // read the password or hash from stdin
         getPassword();
 
+        // send the Hash of the unknown password to all other workers
         for(int i=1; i<totalProcesses; i++)
         {
             MPI_Send(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, i, hash, MPI_COMM_WORLD);
         }
 
+        // start bruteforcing
         for(int i=1; i<=MaxChars; i++)
         {
             cout << "checking passwords with " << i << " characters..." << endl;
@@ -87,6 +100,7 @@ int main(int argc, char** argv)
         MPI_Probe(MasterProcess, MPI_ANY_TAG, MPI_COMM_WORLD, &state);
 
         MPI_Recv(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, MasterProcess, MPI_ANY_TAG, MPI_COMM_WORLD, &state);
+
         worker();
     }
 
