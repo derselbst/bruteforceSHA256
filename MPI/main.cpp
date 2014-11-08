@@ -44,27 +44,26 @@ void getPassword()
         if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
         {
             cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
-            MPI_Abort(MPI_COMM_WORLD, -3);
+            MPI::COMM_WORLD.Abort(-3);
         }
     }
 }
 
 int main(int argc, char** argv)
 {
-    MPI_Init(&argc, &argv);
+    MPI::Init(argc, argv);
 
     // determine the size of the world
     totalProcesses=MPI::COMM_WORLD.Get_size();
     if(totalProcesses < 2)
     {
         cerr << "Insufficient number of workers: " << totalProcesses-1 << endl << "Aborting" << endl;
-        MPI_Finalize();
+        MPI::Finalize();
         return -1;
     }
 
     // determine which process i am
-    int worldRank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
+    int worldRank = MPI::COMM_WORLD.Get_rank();
 
     if(worldRank == MasterProcess)
     {
@@ -78,7 +77,7 @@ int main(int argc, char** argv)
         // send the Hash of the unknown password to all other workers
         for(int i=1; i<totalProcesses; i++)
         {
-            MPI_Send(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, i, hash, MPI_COMM_WORLD);
+            MPI::COMM_WORLD.Send(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, i, hash);
         }
 
         // start bruteforcing
@@ -90,20 +89,20 @@ int main(int argc, char** argv)
 
         cerr << "Sorry, password not found" << endl;
         // TODO: shutdown a bit more friendly
-        MPI_Abort(MPI_COMM_WORLD, -2);
+        MPI::COMM_WORLD.Abort(-2);
     }
     else
     {
-        MPI_Status state;
+        MPI::Status state;
 
         // check for new msg
-        MPI_Probe(MasterProcess, MPI_ANY_TAG, MPI_COMM_WORLD, &state);
+        MPI::COMM_WORLD.Probe(MasterProcess, MPI_ANY_TAG, state);
 
-        MPI_Recv(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, MasterProcess, MPI_ANY_TAG, MPI_COMM_WORLD, &state);
+        MPI::COMM_WORLD.Recv(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, MasterProcess, MPI_ANY_TAG, state);
 
         worker();
     }
 
-    MPI_Finalize();
+    MPI::Finalize();
     return 0;
 }

@@ -36,7 +36,7 @@ void CallMPIProcess(const string &baseStringPwd)
 #endif // VERBOSE
 
     // ...evil const_cast...
-    MPI_Send(const_cast<char*>(baseStringPwd.c_str()), baseStringPwd.length(), MPI_BYTE, currentProcess, task, MPI_COMM_WORLD);//, &request[currentProcess]);
+    MPI::COMM_WORLD.Send(baseStringPwd.c_str(), baseStringPwd.length(), MPI_BYTE, currentProcess, task);
 
     currentProcess++;
     if(currentProcess >= totalProcesses)

@@ -125,19 +125,18 @@ bool checkPassword(const string &password)
 void worker()
 {
     char buf[MaxChars];
-    MPI_Status state;
+    MPI::Status state;
 
     while(true)
     {
         // check for new msg
-        MPI_Probe(MasterProcess, MPI_ANY_TAG, MPI_COMM_WORLD, &state);
+        MPI::COMM_WORLD.Probe(MasterProcess, MPI_ANY_TAG, state);
 
-        int len;
         // now check status to determine how many bytes were actually received
-        MPI_Get_count(&state, MPI_BYTE, &len);
+        int len = state.Get_count(MPI_BYTE);
 
         // receive len bytes
-        MPI_Recv(buf, len, MPI_BYTE, MasterProcess, MPI_ANY_TAG, MPI_COMM_WORLD, &state);
+        MPI::COMM_WORLD.Recv(buf, len, MPI_BYTE, MasterProcess, MPI_ANY_TAG, state);
 
         string baseStr(buf, len);
 
@@ -145,10 +144,8 @@ void worker()
         {
             if(checkPassword(baseStr+alphabet[i]))
             {
-                //success, tell master
-                //MPI_Send(const_cast<char*>(baseStr+alphabet[i].c_str()), baseStr+alphabet[i].length(), MPI_CHAR, MasterProcess, success, MPI_COMM_WORLD);
                 cout << "Password found: " << baseStr+alphabet[i] << endl;
-                MPI_Abort(MPI_COMM_WORLD, 0);
+                MPI::COMM_WORLD.Abort(0);
 
                 break;
             }
