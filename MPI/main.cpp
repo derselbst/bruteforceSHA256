@@ -6,8 +6,11 @@
 #include <iostream>
 #include <cstring> // std::memcpy()
 #include <string>
+#include <exception>
 #include <openssl/sha.h>
 #include <mpi.h>
+#include <byteswap.h>
+#include <cstdint>
 
 using namespace std;
 
@@ -23,29 +26,51 @@ using namespace std;
  */
 void getPassword()
 {
-    cout << "Enter a Password or an SHA256 Hash: ";
-
-    string pwd;
-    cin >> pwd;
-
-    while((pwd.length() > MaxChars) && (pwd.length() != SHA256_DIGEST_LENGTH))
+    try
     {
-        cerr << "Error: The Password you entered must be shorter " << (int)MaxChars << " Characters." << endl << "Try Again: ";
+        cout << "Enter a Password or an SHA256 Hash: ";
+
+        string pwd;
         cin >> pwd;
-    }
-
-    if(pwd.length() == SHA256_DIGEST_LENGTH)
-    {
-        memcpy(pwdHash, pwd.c_str(), SHA256_DIGEST_LENGTH);
-    }
-    else
-    {
-        // initialize the hash buffer for the password
-        if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash))
+        char tries = 2;
+        while((pwd.length() > MaxChars) && (pwd.length() != SHA256_DIGEST_LENGTH*2))
         {
-            cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
-            MPI::COMM_WORLD.Abort(-3);
+            cerr << "Error: The Password you entered must be shorter " << (int)MaxChars << " Characters." << endl << "Try Again: ";
+            cin >> pwd;
+
+            // avoid spamming
+            if(tries > 5)
+            {
+                    cerr << "Error: Too many wrong inputs." << endl;
+                    MPI::COMM_WORLD.Abort(-5);
+            }
+            tries++;
         }
+
+        if(pwd.length() == SHA256_DIGEST_LENGTH*2)
+        {
+            for(int i=0; i < SHA256_DIGEST_LENGTH/sizeof(uint32_t); i++)
+            {
+                short start = i*sizeof(uint32_t)*2;
+                pwdHash.mem[i] = bswap_32(stol(pwd.substr(start, 8), nullptr, 16));
+            }
+            cout << "The SHA256 Hash of your unkown password is: ";
+            printSHAHash(pwdHash.mem);
+        }
+        else
+        {
+            // initialize the hash buffer for the password
+            if(!generateSHA256(pwd.c_str(), pwd.length(), pwdHash.c))
+            {
+                cerr << "Error when generating SHA256 from \"" << pwd << "\"" << endl;
+                MPI::COMM_WORLD.Abort(-3);
+            }
+        }
+    }
+    catch(exception e)
+    {
+        cerr << "Error: " << e.what() << endl;
+        MPI::COMM_WORLD.Abort(-4);
     }
 }
 
@@ -77,7 +102,7 @@ int main(int argc, char** argv)
         // send the Hash of the unknown password to all other workers
         for(int i=1; i<totalProcesses; i++)
         {
-            MPI::COMM_WORLD.Send(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, i, hash);
+            MPI::COMM_WORLD.Send(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, i, MpiMsgTag::hash);
         }
 
         // start bruteforcing

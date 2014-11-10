@@ -18,10 +18,10 @@ using namespace std;
 #include "alphabet.h"
 
 // contains the hash of the unknown password
-char pwdHash[SHA256_DIGEST_LENGTH];
+SHA256Hash pwdHash;
 
 // contains the hash of a bruteforced string
-char bruteHash[SHA256_DIGEST_LENGTH];
+SHA256Hash bruteHash;
 
 /**
  * @brief prints 32 bytes of memory
@@ -30,20 +30,17 @@ char bruteHash[SHA256_DIGEST_LENGTH];
  *
  * @param[in]   pbuf: pointer to some memory, usually containing an SHA256 hash
  */
-void printSHAHash(const unsigned int *const pbuf)
+void printSHAHash(const uint32_t *const pbuf)
 {
     // byteswap the integer pointed to, to display hex dump in correct order
     // TODO: how to deal with big endian machines
-    cout << hex << uppercase << setw(8) << setfill('0')
-         << bswap_32(*(pbuf))
-         << bswap_32(*(pbuf+1))
-         << bswap_32(*(pbuf+2))
-         << bswap_32(*(pbuf+3))
-         << bswap_32(*(pbuf+4))
-         << bswap_32(*(pbuf+5))
-         << bswap_32(*(pbuf+6))
-         << bswap_32(*(pbuf+7))
-         << endl;
+    cout << hex << uppercase << setw(8) << setfill('0');
+
+    for(char i=0; i < SHA256_DIGEST_LENGTH/sizeof(uint32_t); i++)
+    {
+        cout << bswap_32(pbuf[i]);
+    }
+    cout << endl;
 }
 
 /**
@@ -100,16 +97,16 @@ bool checkPassword(const string &password)
 #endif // VERBOSE
 
     // generate sha hash from entered string and write it to pwdHash
-    if(!generateSHA256(password.c_str(), password.length(), bruteHash))
+    if(!generateSHA256(password.c_str(), password.length(), bruteHash.c))
     {
         cerr << "Error when generating SHA256 from \"" << password << "\"" << endl;
         return false;
     }
 
-    if (!memcmp(bruteHash, pwdHash, SHA256_DIGEST_LENGTH))
+    if (!memcmp(bruteHash.c, pwdHash.c, SHA256_DIGEST_LENGTH))
     {
         cout << "match [" << password << "]" << endl << "hash: " << endl;
-        printSHAHash((unsigned int*)bruteHash);
+        printSHAHash(bruteHash.mem);
         return true;
     }
 
