@@ -47,6 +47,7 @@ void getPassword()
             tries++;
         }
 
+        // the provided password seems to be an SHA hash
         if(pwd.length() == SHA256_DIGEST_LENGTH*2)
         {
             for(int i=0; i < SHA256_DIGEST_LENGTH/sizeof(uint32_t); i++)
@@ -54,7 +55,7 @@ void getPassword()
                 short start = i*sizeof(uint32_t)*2;
                 pwdHash.mem[i] = bswap_32(stol(pwd.substr(start, 8), nullptr, 16));
             }
-            cout << "The SHA256 Hash of your unkown password is: ";
+            cout << "The SHA256 Hash of your unknown password is: ";
             printSHAHash(pwdHash.mem);
         }
         else
@@ -118,6 +119,9 @@ int main(int argc, char** argv)
     }
     else
     {
+        /**************************************************
+         * This is where all the Worker Processes operate *
+         **************************************************/
         MPI::Status state;
 
         // check for new msg

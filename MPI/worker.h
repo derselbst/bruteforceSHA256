@@ -1,7 +1,10 @@
 typedef union _SHA256Hash
 {
-        char c[SHA256_DIGEST_LENGTH];
+        // this view is used when reading or manipulating bytes of the SHA Hash
         uint32_t mem[SHA256_DIGEST_LENGTH/sizeof(uint32_t)];
+
+        // this view is used else
+        char c[SHA256_DIGEST_LENGTH];
 } SHA256Hash;
 
 // contains the hash of the unknown password
