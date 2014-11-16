@@ -36,7 +36,7 @@ void printSHAHash(const uint32_t *const pbuf)
     // TODO: how to deal with big endian machines
     cout << hex << uppercase << setw(8) << setfill('0');
 
-    for(char i=0; i < SHA256_DIGEST_LENGTH/sizeof(uint32_t); i++)
+    for(unsigned short i=0; i < SHA256_DIGEST_LENGTH/sizeof(uint32_t); i++)
     {
         cout << bswap_32(pbuf[i]);
     }
