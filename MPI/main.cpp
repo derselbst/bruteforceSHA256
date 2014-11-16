@@ -50,7 +50,7 @@ void getPassword()
         // the provided password seems to be an SHA hash
         if(pwd.length() == SHA256_DIGEST_LENGTH*2)
         {
-            for(int i=0; i < SHA256_DIGEST_LENGTH/sizeof(uint32_t); i++)
+            for(unsigned short i=0; i < SHA256_DIGEST_LENGTH/sizeof(uint32_t); i++)
             {
                 short start = i*sizeof(uint32_t)*2;
                 pwdHash.mem[i] = bswap_32(stol(pwd.substr(start, 8), nullptr, 16));
