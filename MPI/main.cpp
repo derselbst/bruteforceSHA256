@@ -75,63 +75,93 @@ void getPassword()
     }
 }
 
+void usage(char *name)
+{
+    //printing out usage to stdout
+    cout<<"usage of '"<<name<<"'\n";
+    cout<<" Please start it with: mpirun -np N "<<name<<" , where N is \n";
+    cout<<" the total number of processes, but not more parameters. \n";
+    cout<<" This program bruteforce an entered clear-password (check \n";
+    cout<<" all possible SHA256 hashes) or an given SHA256-Hash (in HEX).\n\n";
+
+    cout<<" HINT: It is not recommend to start this program without 'mpirun'\n";
+    cout<<"       or with paramters. If you start it with ones, it will\n";
+    cout<<"       cause an error and print this message out.\n";
+}
+
+
 int main(int argc, char** argv)
 {
     MPI::Init(argc, argv);
 
-    // determine the size of the world
-    totalProcesses=MPI::COMM_WORLD.Get_size();
-    if(totalProcesses < 2)
+    //dont do any more if this programm has any paramters
+    if(argc > 1)
     {
-        cerr << "Insufficient number of workers: " << totalProcesses-1 << endl << "Aborting" << endl;
-        MPI::Finalize();
-        return -1;
+    	//needed, cause only one process have to be print out the usage not all. 
+    	if(MPI::COMM_WORLD.Get_rank() == MasterProcess) usage(argv[0]);
+    	MPI::Finalize();
+    	return -1;
+    }else
+    {
+	    // determine the size of the world
+	    totalProcesses=MPI::COMM_WORLD.Get_size();
+	    if(totalProcesses < 2)
+	    {
+		cerr << "Insufficient number of workers: " << totalProcesses-1 << endl << "Aborting" << endl;
+
+		//only the masterProcess print out the usage if needed.
+		if(MPI::COMM_WORLD.Get_rank() == MasterProcess) usage(argv[0]);
+		MPI::Finalize();
+		return -1;
+	    }
+
+	    // determine which process i am
+	    int worldRank = MPI::COMM_WORLD.Get_rank();
+
+	    if(worldRank == MasterProcess)
+	    {
+		/********************************************
+		 * This is where the MasterProcess operates *
+		 ********************************************/
+
+		// read the password or hash from stdin
+		getPassword();
+
+		// send the Hash of the unknown password to all other workers
+		for(int i=1; i<totalProcesses; i++)
+		{
+		    MPI::COMM_WORLD.Send(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, i, MpiMsgTag::hash);
+		}
+
+		// start bruteforcing
+		for(int i=1; i<=MaxChars; i++)
+		{
+		    cout << "checking passwords with " << i << " characters..." << endl;
+		    bruteRecursive(string(""), i-1, i);
+		}
+
+		cerr << "Sorry, password not found" << endl;
+		// TODO: shutdown a bit more friendly
+		MPI::COMM_WORLD.Abort(-2);
+	    }
+	    else
+	    {
+		/**************************************************
+		 * This is where all the Worker Processes operate *
+		 **************************************************/
+		MPI::Status state;
+
+		// check for new msg
+		MPI::COMM_WORLD.Probe(MasterProcess, MPI_ANY_TAG, state);
+
+		MPI::COMM_WORLD.Recv(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, MasterProcess, MPI_ANY_TAG, state);
+
+		worker();
+	    }
+
+	    MPI::Finalize();
+	    return 0;
+
     }
 
-    // determine which process i am
-    int worldRank = MPI::COMM_WORLD.Get_rank();
-
-    if(worldRank == MasterProcess)
-    {
-        /********************************************
-         * This is where the MasterProcess operates *
-         ********************************************/
-
-        // read the password or hash from stdin
-        getPassword();
-
-        // send the Hash of the unknown password to all other workers
-        for(int i=1; i<totalProcesses; i++)
-        {
-            MPI::COMM_WORLD.Send(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, i, MpiMsgTag::hash);
-        }
-
-        // start bruteforcing
-        for(int i=1; i<=MaxChars; i++)
-        {
-            cout << "checking passwords with " << i << " characters..." << endl;
-            bruteRecursive(string(""), i-1, i);
-        }
-
-        cerr << "Sorry, password not found" << endl;
-        // TODO: shutdown a bit more friendly
-        MPI::COMM_WORLD.Abort(-2);
-    }
-    else
-    {
-        /**************************************************
-         * This is where all the Worker Processes operate *
-         **************************************************/
-        MPI::Status state;
-
-        // check for new msg
-        MPI::COMM_WORLD.Probe(MasterProcess, MPI_ANY_TAG, state);
-
-        MPI::COMM_WORLD.Recv(&pwdHash, SHA256_DIGEST_LENGTH, MPI_BYTE, MasterProcess, MPI_ANY_TAG, state);
-
-        worker();
-    }
-
-    MPI::Finalize();
-    return 0;
 }
