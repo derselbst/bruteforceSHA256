@@ -77,16 +77,16 @@ void getPassword()
 
 void usage(char *name)
 {
-    //printing out usage to stdout
-    cout<<"usage of '"<<name<<"'\n";
-    cout<<" Please start it with: mpirun -np N "<<name<<" , where N is \n";
-    cout<<" the total number of processes, but not more parameters. \n";
-    cout<<" This program bruteforce an entered clear-password (check \n";
-    cout<<" all possible SHA256 hashes) or an given SHA256-Hash (in HEX).\n\n";
+    // printing out usage to stdout
+    cout << "usage of " << name << endl;
+    cout << " Please start it with: mpirun -np N " << name << " , where N is" << endl;
+    cout << " the total number of processes." << endl;
+    cout << " This program bruteforces an entered clear-text-password (by checking all possible SHA256 hashes)" << endl;
+    cout << " or a given SHA256-Hash (in HEX representation, exactly 64 Bytes long)." << endl << endl;
 
-    cout<<" HINT: It is not recommend to start this program without 'mpirun'\n";
-    cout<<"       or with paramters. If you start it with ones, it will\n";
-    cout<<"       cause an error and print this message out.\n";
+    cout << " HINT: It is not recommend to start this program without 'mpirun'" << endl;
+    cout << "       or with any paramters. If you start it with ones, it will" << endl;
+    cout << "       cause an error and print out this message." << endl;
 }
 
 
@@ -94,29 +94,37 @@ int main(int argc, char** argv)
 {
     MPI::Init(argc, argv);
 
-    //dont do any more if this programm has any paramters
+    // cancel if this programm has any paramters
     if(argc > 1)
     {
-    	//needed, cause only one process have to be print out the usage not all. 
-    	if(MPI::COMM_WORLD.Get_rank() == MasterProcess) usage(argv[0]);
+    	// only one process prints out the usage 
+    	if(MPI::COMM_WORLD.Get_rank() == MasterProcess)
+	{
+	    usage(argv[0]);
+	}
     	MPI::Finalize();
     	return -1;
-    }else
+    }
+    else
     {
 	    // determine the size of the world
 	    totalProcesses=MPI::COMM_WORLD.Get_size();
+	    
+	    // determine which process i am
+	    int worldRank = MPI::COMM_WORLD.Get_rank();
+	    
 	    if(totalProcesses < 2)
 	    {
 		cerr << "Insufficient number of workers: " << totalProcesses-1 << endl << "Aborting" << endl;
 
-		//only the masterProcess print out the usage if needed.
-		if(MPI::COMM_WORLD.Get_rank() == MasterProcess) usage(argv[0]);
+		// only the masterProcess should print out the usage
+		if(worldRank == MasterProcess)
+		{
+		    usage(argv[0]);
+		}
 		MPI::Finalize();
 		return -1;
 	    }
-
-	    // determine which process i am
-	    int worldRank = MPI::COMM_WORLD.Get_rank();
 
 	    if(worldRank == MasterProcess)
 	    {
@@ -161,7 +169,5 @@ int main(int argc, char** argv)
 
 	    MPI::Finalize();
 	    return 0;
-
     }
-
 }
