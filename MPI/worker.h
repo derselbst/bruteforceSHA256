@@ -13,6 +13,6 @@ extern SHA256Hash pwdHash;
 // contains the hash of a bruteforced string
 extern SHA256Hash bruteHash;
 
-void printSHAHash(const uint32_t *const pbuf);
+void printSHAHash(const uint32_t pbuf[SHA256_DIGEST_LENGTH/sizeof(uint32_t)]);
 bool generateSHA256(const void *const input, const size_t &length, char *const hashStr);
 void worker();

@@ -30,11 +30,11 @@ SHA256Hash bruteHash;
  *
  * @param[in]   pbuf: pointer to some memory, usually containing an SHA256 hash
  */
-void printSHAHash(const uint32_t *const pbuf)
+void printSHAHash(const uint32_t pbuf[SHA256_DIGEST_LENGTH/sizeof(uint32_t)])
 {
     // byteswap the integer pointed to, to display hex dump in correct order
     // TODO: how to deal with big endian machines
-    cout << hex << uppercase << setw(8) << setfill('0');
+    cout << hex << uppercase << setw(SHA256_DIGEST_LENGTH/sizeof(uint32_t)) << setfill('0');
 
     for(unsigned short i=0; i < SHA256_DIGEST_LENGTH/sizeof(uint32_t); i++)
     {
